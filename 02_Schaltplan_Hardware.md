@@ -24,7 +24,7 @@ Verhindert, dass der Motor unkontrolliert anläuft, während der ESP32-C3 bootet
 ### 1.4 Bus-Kurzschluss-Schutz (Feetech 1-Wire)
 Schützt den Level-Shifter und den ESP32 vor Überströmen auf der Feetech-Datenleitung.
 *   **Bauteil:** 1x 220 Ω Widerstand.
-*   **Position:** In Reihe in der 5V-Datenleitung (zwischen Level Shifter und dem externen Bus).
+*   **Position:** Auf der 3.3V LV-Seite zwischen ESP32-C3 TX (GPIO 21) und dem ESP32-C3 RX (GPIO 20) Knotenpunkt VOR dem Level Shifter LV1 Eingang.
 
 ## 2. Pin-Belegung & Architektur
 
@@ -80,7 +80,9 @@ graph TD
     AS5600 -.->|Magnetfeld| MOTOR
     
     %% Feetech Kommunikation
-    ESP_UART[GPIO 20/21 UART] <-->|3.3V RX/TX| SHIFTER_LV
-    SHIFTER_HV <-->|5V RX/TX verbunden| R_BUS[220Ω Widerstand]
-    R_BUS <--> FEETECH((Feetech Half-Duplex Bus))
+    ESP_TX[GPIO 21 TX] -->|3.3V| R_BUS[220Ω Widerstand]
+    ESP_RX[GPIO 20 RX] --- NODE_LV1((LV1 Knotenpunkt))
+    R_BUS --> NODE_LV1
+    NODE_LV1 <-->|3.3V Half-Duplex| SHIFTER_LV
+    SHIFTER_HV <-->|5V Half-Duplex| FEETECH((Feetech Datenbus))
 ```

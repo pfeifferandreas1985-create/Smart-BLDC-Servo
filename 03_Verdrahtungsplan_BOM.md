@@ -60,17 +60,16 @@ Dieses Dokument enthält den detaillierten Verdrahtungsplan, die exakten Pin-Bel
 | :--- | :--- | :--- | :--- |
 | `3.3V` (Ausgang) | Power | `LV` (Low Voltage) | 3.3V Referenzspannung für den ESP32 |
 | `GND` | Masse | `GND` | |
-| `GPIO 20` | UART RX | `LV1` | Empfangsleitung (3.3V Level) |
-| `GPIO 21` | UART TX | `LV2` | Sendeleitung (3.3V Level) |
+| `GPIO 20` | UART RX | `LV1` | Empfangsleitung (direkt mit LV1 verbunden) |
+| `GPIO 21` | UART TX | `LV1` | **Achtung:** Über `220Ω Widerstand` an denselben Pin `LV1` anschließen! |
 
 ### 🌐 Level Shifter -> Feetech Bus (Extern)
 | Level Shifter | Funktion | Externer Bus | Anmerkung |
 | :--- | :--- | :--- | :--- |
-| `HV1` | UART RX (5V) | `DATA` Leitung | `HV1` und `HV2` brücken! (Half Duplex 1-Wire) |
-| `HV2` | UART TX (5V) | `DATA` Leitung | |
+| `HV1` | UART (5V) | `DATA` Leitung | `HV1` geht direkt als Single-Wire-Bus nach draußen |
 | `HV` | Power | `5V` (Extern) | Wenn andere Servos am Bus sind, 5V-GND Level mitschleifen |
 
-*Hinweis: Zwischen den gebrückten Pins `HV1`/`HV2` und der eigentlichen externen `DATA` Klemme kommt der 220Ω Widerstand (siehe unten).*
+*Hinweis: Da RX und TX bereits auf der LV-Seite (3.3V) über den 220Ω Widerstand auf `LV1` zusammengeführt werden, wird nur ein Kanal (`LV1` zu `HV1`) des Level Shifters benötigt.*
 
 ---
 
@@ -93,5 +92,5 @@ Dieses Dokument enthält den detaillierten Verdrahtungsplan, die exakten Pin-Bel
 
 4. **Bus-Kurzschluss-Schutz (Feetech 1-Wire):**
    * **Bauteil:** 1x `220 Ω` Widerstand.
-   * **Einbauort:** In Reihe nach dem Level Shifter. (Knotenpunkt von HV1+HV2 -> 220Ω Widerstand -> Externe Datenleitung).
-   * **Warum?** Verhindert das Durchbrennen des Level Shifters, wenn zwei Servos gleichzeitig "Senden" (HIGH Pegel).
+   * **Einbauort:** Auf der 3.3V LV-Seite zwischen dem ESP32-C3 TX-Pin und dem Knotenpunkt zur RX-Leitung vor dem Level Shifter. (ESP32 TX -> 220Ω Widerstand -> Verbindung mit ESP32 RX -> Level Shifter LV-Eingang).
+   * **Warum?** Begrenzt den Strom und verhindert einen Kurzschluss, wenn der ESP32 sendet (TX = HIGH), während gleichzeitig ein anderes Gerät auf dem Bus sendet.
