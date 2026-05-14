@@ -36,14 +36,15 @@ BLDCMotor motor = BLDCMotor(POLE_PAIRS);
 // ==========================================
 // VARIABLEN FÜR FEETECH BUS
 // ==========================================
-// Target position for Feetech control
-float target_position = 0.0;
+// Target values
+float target_value = 0.0;
+String command_buffer = "";
+unsigned long last_telemetry = 0;
 
 void setup() {
-  // 1. Debugging Serial (USB)
+  // 1. Debugging & Web-Dashboard Serial (USB)
   Serial.begin(115200);
   delay(1000);
-  Serial.println("Smart BLDC Servo - Starte Initialisierung...");
 
   // 2. I2C Bus initialisieren (ESP32-C3 Custom Pins)
   Wire.begin(PIN_SDA, PIN_SCL, 400000); // 400 kHz Fast Mode
@@ -85,7 +86,7 @@ void setup() {
   Serial1.begin(1000000, SERIAL_8N1, PIN_RX, PIN_TX);
   Serial.println("Feetech UART Bus lauscht auf 1 Mbps.");
 
-  target_position = motor.sensor_direction * sensor.getAngle();
+  target_value = motor.sensor_direction * sensor.getAngle();
 }
 
 void loop() {
@@ -93,10 +94,72 @@ void loop() {
   motor.loopFOC();
 
   // 2. Motor Bewegung ausführen
-  motor.move(target_position);
+  motor.move(target_value);
 
-  // 3. Feetech Bus auslesen (Nicht-blockierend!)
+  // 3. Telemetrie an Web-Dashboard senden (alle 100ms)
+  if (millis() - last_telemetry > 100) {
+    last_telemetry = millis();
+    sendTelemetry();
+  }
+
+  // 4. Kommandos vom Web-Dashboard empfangen
+  processDashboardCommands();
+
+  // 5. Feetech Bus auslesen (Nicht-blockierend!)
   processFeetechBus();
+}
+
+// ==========================================
+// WEB DASHBOARD KOMMUNIKATION (JSON via USB)
+// ==========================================
+void sendTelemetry() {
+  // {"pos": 180.5, "rpm": 1200, "volt": 12.0}
+  float pos_deg = (motor.shaft_angle / (2.0 * PI)) * 360.0;
+  float rpm = (motor.shaft_velocity / (2.0 * PI)) * 60.0;
+  float volt = driver.voltage_power_supply; // In real life, measure via ADC or static
+
+  Serial.print("{\"pos\": ");
+  Serial.print(pos_deg, 1);
+  Serial.print(", \"rpm\": ");
+  Serial.print(rpm, 0);
+  Serial.print(", \"volt\": ");
+  Serial.print(volt, 1);
+  Serial.println("}");
+}
+
+void processDashboardCommands() {
+  while (Serial.available()) {
+    char c = Serial.read();
+    if (c == '\n') {
+      // Very basic JSON parse for {"mode": "speed", "val": 500}
+      if (command_buffer.indexOf("\"mode\":\"speed\"") > 0 || command_buffer.indexOf("\"mode\": \"speed\"") > 0) {
+        motor.controller = MotionControlType::velocity;
+      } else if (command_buffer.indexOf("\"mode\":\"pos\"") > 0 || command_buffer.indexOf("\"mode\": \"pos\"") > 0) {
+        motor.controller = MotionControlType::angle;
+      }
+
+      int valIndex = command_buffer.indexOf("\"val\":");
+      if (valIndex > 0) {
+        float val = command_buffer.substring(valIndex + 6).toFloat();
+        if (motor.controller == MotionControlType::velocity) {
+          // Input ist U/min, Konvertierung zu rad/s
+          target_value = (val / 60.0) * (2.0 * PI);
+        } else {
+          // Input ist Grad, Konvertierung zu rad
+          target_value = (val / 360.0) * (2.0 * PI);
+        }
+      }
+
+      if (command_buffer.indexOf("\"cmd\":\"zero\"") > 0 || command_buffer.indexOf("\"cmd\": \"zero\"") > 0) {
+         sensor.init(); // Re-init setzt den Nullpunkt (bei inkrementell, bei AS5600 bräuchte man Offset)
+         motor.sensor_offset = sensor.getAngle();
+      }
+
+      command_buffer = "";
+    } else {
+      command_buffer += c;
+    }
+  }
 }
 
 // ==========================================
