@@ -1,0 +1,48 @@
+(module MP1584EN_Module (layer F.Cu) (tedit 65130001)
+  (descr "MP1584EN buck converter module, board 22x17 mm, side headers top/bottom, pitch 2.54 mm, 1.27 mm edge offsets")
+  (tags "MP1584EN buck converter module")
+
+  (fp_text reference REF** (at 11 1) (layer F.SilkS) hide
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+  (fp_text value MP1584EN_Module (at 11 -18.5) (layer F.Fab)
+    (effects (font (size 1 1) (thickness 0.15)))
+  )
+
+
+  (fp_line (start 0 0) (end 22 0) (layer F.Fab) (width 0.12))
+  (fp_line (start 22 0) (end 22 -17) (layer F.Fab) (width 0.12))
+  (fp_line (start 22 -17) (end 0 -17) (layer F.Fab) (width 0.12))
+  (fp_line (start 0 -17) (end 0 0) (layer F.Fab) (width 0.12))
+
+
+  (fp_line (start -0.1 0.1) (end 22.1 0.1) (layer F.SilkS) (width 0.12))
+  (fp_line (start 22.1 0.1) (end 22.1 -17.1) (layer F.SilkS) (width 0.12))
+  (fp_line (start 22.1 -17.1) (end -0.1 -17.1) (layer F.SilkS) (width 0.12))
+  (fp_line (start -0.1 -17.1) (end -0.1 0.1) (layer F.SilkS) (width 0.12))
+
+
+  (fp_line (start -0.5 0.5) (end 22.5 0.5) (layer F.CrtYd) (width 0.05))
+  (fp_line (start 22.5 0.5) (end 22.5 -17.5) (layer F.CrtYd) (width 0.05))
+  (fp_line (start 22.5 -17.5) (end -0.5 -17.5) (layer F.CrtYd) (width 0.05))
+  (fp_line (start -0.5 -17.5) (end -0.5 0.5) (layer F.CrtYd) (width 0.05))
+
+ 
+  (fp_circle (center 1.27 -1.27) (end 1.87 -1.27) (layer F.SilkS) (width 0.15))
+
+
+  (pad 1 thru_hole oval (at 1.27 -1.27) (size 2.2 1.8) (drill 1.0) (layers *.Cu *.Mask))
+  (pad 2 thru_hole oval (at 1.27 -3.81) (size 2.2 1.8) (drill 1.0) (layers *.Cu *.Mask))
+
+
+  (pad 3 thru_hole oval (at 1.27 -15.73) (size 2.2 1.8) (drill 1.0) (layers *.Cu *.Mask))
+  (pad 4 thru_hole oval (at 1.27 -13.19) (size 2.2 1.8) (drill 1.0) (layers *.Cu *.Mask))
+
+
+  (pad 5 thru_hole oval (at 20.73 -1.27) (size 2.2 1.8) (drill 1.0) (layers *.Cu *.Mask))
+  (pad 6 thru_hole oval (at 20.73 -3.81) (size 2.2 1.8) (drill 1.0) (layers *.Cu *.Mask))
+
+
+  (pad 7 thru_hole oval (at 20.73 -15.73) (size 2.2 1.8) (drill 1.0) (layers *.Cu *.Mask))
+  (pad 8 thru_hole oval (at 20.73 -13.19) (size 2.2 1.8) (drill 1.0) (layers *.Cu *.Mask))
+)

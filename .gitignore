@@ -1,0 +1,10 @@
+
+# KiCad backups and locks
+~*.lck
+*.bak
+*.kicad_pcb-bak
+*.kicad_sch-bak
+_restore_backup_*/
+backup_untitled/
+.history/
+nohup.out
